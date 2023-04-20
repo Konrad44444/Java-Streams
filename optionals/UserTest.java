@@ -151,5 +151,30 @@ public class UserTest {
         });
     }
 
+    // --- Transforming Values ---
+
+    //map() transformation - when method return object
+    @Test
+    public void whenMap_thenOk() throws Exception {
+        User user = new User(NAME, ADDRESS);
+
+        //if user is not null String name is user's name else it is the other name
+        String name = Optional.ofNullable(user)
+            .map(u -> user.getName()).orElse(NAME_IN_METHOD);
+
+        assertEquals(name, user.getName());
+    }
+
+    //flatMap() transformation - when method returns Optional value
+    @Test
+    public void whenFlatMap_thenOk() throws Exception {
+        User user = new User(NAME, ADDRESS);
+        String name = Optional.ofNullable(user)
+            .flatMap(u -> u.getNameOptional()).orElse(NAME_IN_METHOD);
+        
+        assertEquals(name, user.getNameOptional().get());
+        
+    }
+
 }
     

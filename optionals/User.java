@@ -1,5 +1,7 @@
 package optionals;
 
+import java.util.Optional;
+
 public class User {
     private String name;
     private String address;
@@ -29,6 +31,10 @@ public class User {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Optional<String> getNameOptional() {
+        return Optional.ofNullable(name);
     }
 
 }
