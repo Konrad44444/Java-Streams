@@ -14,6 +14,7 @@ public class UserTest {
     static final String NAME = "Bulbek";
     static final String ADDRESS = "Krakow";
     static final String NAME_IN_METHOD = "Adam";
+    static final String EMAIL = "example@email.com";
 
 
     private User createNewUser() {
@@ -173,8 +174,20 @@ public class UserTest {
             .flatMap(u -> u.getNameOptional()).orElse(NAME_IN_METHOD);
         
         assertEquals(name, user.getNameOptional().get());
-        
     }
 
+    // --- Filtering Values ---
+
+    //filter() method takes a Predicate as an argument and returns the value as it is if the test evaluates to true
+    //example - simple email validation
+    @Test
+    public void whenFilter_thenOk() throws Exception {
+        User user = new User(NAME, ADDRESS, EMAIL);
+
+        Optional<User> result = Optional.ofNullable(user)
+            .filter(u -> u.getEmail() != null && u.getEmail().contains("@"));
+
+        assertTrue(result.isPresent());
+    }
 }
     
