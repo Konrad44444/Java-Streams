@@ -10,7 +10,16 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;   
     
 public class UserTest {
-    final String NAME = "Bulbek";
+    static final String NAME = "Bulbek";
+    static final String ADDRESS = "Krakow";
+    static final String NAME_IN_METHOD = "Adam";
+
+
+    private User createNewUser() {
+        System.out.println("createNewUser()");
+        return new User(NAME_IN_METHOD, ADDRESS);
+    }
+
     // --- Creating Optionals ---
 
     @Test
@@ -51,7 +60,7 @@ public class UserTest {
     //checking whether the value in optional is not null
     @Test
     public void whenCheckIfPresent_thenOk() throws Exception {
-        User u = new User(NAME, "123");
+        User u = new User(NAME, ADDRESS);
         Optional<User> userOpt = Optional.ofNullable(u);
 
         assertTrue(userOpt.isPresent());
@@ -61,12 +70,71 @@ public class UserTest {
     //using ifPresent() method
     @Test
     public void ifPresentMethodTest() throws Exception {
-        User u = new User(NAME, "123");
+        User u = new User(NAME, ADDRESS);
         Optional<User> userOpt = Optional.ofNullable(u);
 
         userOpt.ifPresent(user -> assertEquals(NAME, user.getName()));
     }
+
+    // --- Returning Default Values ---
     
+    //orElse() method will return optional value if it's present or the value in the argument
+    @Test
+    public void whenEmptyValue_thenReturnDefault() throws Exception {
+        User u1 = null;
+        User u2 = new User(NAME, ADDRESS);
+
+        User result = Optional.ofNullable(u1).orElse(u2);
+
+        assertEquals(result.getName(), u2.getName());
+    }
+
+    @Test
+    public void whenEmptyValue_thenExecuteMethod() throws Exception {
+        User u1 = null;
+
+        User result = Optional.ofNullable(u1).orElse(createNewUser());
+    }
+
+    @Test
+    public void whenNotEmptyValue_thenReturnDefault() throws Exception {
+        User u1 = new User(ADDRESS, NAME);
+        User u2 = new User(NAME, ADDRESS);
+
+        User result = Optional.ofNullable(u1).orElse(u2);
+
+        assertEquals(result.getName(), u1.getName());
+    }
+
+    //orElseGet() method will execute the argument if value is null
+    @Test
+    public void givenEmptyValue_whenCompare_thenOk() throws Exception {
+        User u = null;
+
+        //in this case result is the same
+
+        System.out.println("Using orElse():");
+        User userOpt1 = Optional.ofNullable(u).orElse(createNewUser());
+
+        System.out.println("Using orElse():");
+        User userOpt2 = Optional.ofNullable(u).orElseGet(() -> createNewUser());
+    }
+
+    @Test
+    public void givenPresentValue_whenCompare_thenOk() throws Exception {
+        User u = new User(NAME, ADDRESS);
+
+        //in this case orElse() whill tun method and onElseGet won't - effect on performence
+
+        System.out.println("Using orElse():");
+        User userOpt1 = Optional.ofNullable(u).orElse(createNewUser());
+
+        System.out.println("Using orElse():");
+        User userOpt2 = Optional.ofNullable(u).orElseGet(() -> createNewUser());
+
+        //but the objects in Optional are the same
+        assertEquals(userOpt1.getName(), userOpt2.getName());
+    }
 
 }
     
