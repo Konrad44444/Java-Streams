@@ -3,6 +3,7 @@ package optionals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.NoSuchElementException;
@@ -11,15 +12,17 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;   
     
 public class UserTest {
-    static final String NAME = "Bulbek";
-    static final String ADDRESS = "Krakow";
-    static final String NAME_IN_METHOD = "Adam";
+    static final String NAME_1 = "Bulbek";
+    static final String NAME_2 = "Adam";
     static final String EMAIL = "example@email.com";
-
-
+    static final String COUNTRY_1 = "Polska";
+    static final String COUNTRY_2 = "USA";
+    static final Address ADDRESS = new Address(new Country(COUNTRY_1));
+    static final String DEFAULT = "Default";
+    
     private User createNewUser() {
         System.out.println("createNewUser()");
-        return new User(NAME_IN_METHOD, ADDRESS);
+        return new User(NAME_2, ADDRESS);
     }
 
     // --- Creating Optionals ---
@@ -51,30 +54,30 @@ public class UserTest {
 
     @Test
     public void whenCreateOfNullableOptional_thenOk() throws Exception {
-        String name = NAME;
+        String name = NAME_1;
 
         //will throw an exception if the value is null
         Optional<String> nameOpt = Optional.ofNullable(name);
-        assertEquals(NAME, nameOpt.get());
+        assertEquals(NAME_1, nameOpt.get());
     }
 
     //checking whether the value in optional is not null
     @Test
     public void whenCheckIfPresent_thenOk() throws Exception {
-        User u = new User(NAME, ADDRESS);
+        User u = new User(NAME_1, ADDRESS);
         Optional<User> userOpt = Optional.ofNullable(u);
 
         assertTrue(userOpt.isPresent());
-        assertEquals(NAME, userOpt.get().getName());
+        assertEquals(NAME_1, userOpt.get().getName());
     }
 
     //using ifPresent() method
     @Test
     public void ifPresentMethodTest() throws Exception {
-        User u = new User(NAME, ADDRESS);
+        User u = new User(NAME_1, ADDRESS);
         Optional<User> userOpt = Optional.ofNullable(u);
 
-        userOpt.ifPresent(user -> assertEquals(NAME, user.getName()));
+        userOpt.ifPresent(user -> assertEquals(NAME_1, user.getName()));
     }
 
     // --- Returning Default Values ---
@@ -83,7 +86,7 @@ public class UserTest {
     @Test
     public void whenEmptyValue_thenReturnDefault() throws Exception {
         User u1 = null;
-        User u2 = new User(NAME, ADDRESS);
+        User u2 = new User(NAME_1, ADDRESS);
 
         User result = Optional.ofNullable(u1).orElse(u2);
 
@@ -102,8 +105,8 @@ public class UserTest {
 
     @Test
     public void whenNotEmptyValue_thenReturnDefault() throws Exception {
-        User u1 = new User(ADDRESS, NAME);
-        User u2 = new User(NAME, ADDRESS);
+        User u1 = new User(NAME_2);
+        User u2 = new User(NAME_1);
 
         User result = Optional.ofNullable(u1).orElse(u2);
 
@@ -126,7 +129,7 @@ public class UserTest {
 
     @Test
     public void givenPresentValue_whenCompare_thenOk() throws Exception {
-        User u = new User(NAME, ADDRESS);
+        User u = new User(NAME_1);
 
         //in this case orElse() whill tun method and onElseGet won't - effect on performence
 
@@ -157,11 +160,11 @@ public class UserTest {
     //map() transformation - when method return object
     @Test
     public void whenMap_thenOk() throws Exception {
-        User user = new User(NAME, ADDRESS);
+        User user = new User(NAME_1);
 
         //if user is not null String name is user's name else it is the other name
         String name = Optional.ofNullable(user)
-            .map(u -> user.getName()).orElse(NAME_IN_METHOD);
+            .map(u -> user.getName()).orElse(NAME_2);
 
         assertEquals(name, user.getName());
     }
@@ -169,9 +172,9 @@ public class UserTest {
     //flatMap() transformation - when method returns Optional value
     @Test
     public void whenFlatMap_thenOk() throws Exception {
-        User user = new User(NAME, ADDRESS);
+        User user = new User(NAME_1);
         String name = Optional.ofNullable(user)
-            .flatMap(u -> u.getNameOptional()).orElse(NAME_IN_METHOD);
+            .flatMap(u -> u.getNameOptional()).orElse(NAME_2);
         
         assertEquals(name, user.getNameOptional().get());
     }
@@ -182,12 +185,47 @@ public class UserTest {
     //example - simple email validation
     @Test
     public void whenFilter_thenOk() throws Exception {
-        User user = new User(NAME, ADDRESS, EMAIL);
+        User user = new User(NAME_1, ADDRESS, EMAIL);
 
         Optional<User> result = Optional.ofNullable(user)
             .filter(u -> u.getEmail() != null && u.getEmail().contains("@"));
 
         assertTrue(result.isPresent());
+    }
+
+    // --- Chaining Methods of the Optional class ---
+
+    @Test
+    public void whenChaining_thenOk() throws Exception{
+        User user = new User(NAME_1, ADDRESS, EMAIL);
+        //user country is COUNTRY_1
+
+        String result1 = Optional.ofNullable(user)
+            .flatMap(u -> u.getAddressOptional())
+            .flatMap(a -> a.getCountryOptional())
+            .map(c -> c.getName())
+            .orElse(DEFAULT);
+
+        //reduced version
+        String result2 = Optional.ofNullable(user)
+            .flatMap(User::getAddressOptional)
+            .flatMap(Address::getCountryOptional)
+            .map(Country::getName)
+            .orElse(DEFAULT);
+
+        //with filter
+        String result3 = Optional.ofNullable(user)
+            .flatMap(User::getAddressOptional)
+            .flatMap(Address::getCountryOptional)
+            .map(Country::getName)
+            .filter(c -> c.equals(COUNTRY_2))
+            .orElse(DEFAULT);
+
+
+        assertEquals(result1, COUNTRY_1);
+        assertEquals(result1, result2);
+        assertNotEquals(result3, result1);
+        assertEquals(result3, DEFAULT);
     }
 }
     

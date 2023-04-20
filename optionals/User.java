@@ -4,19 +4,25 @@ import java.util.Optional;
 
 public class User {
     private String name;
-    private String address;
+    private Address address;
     private String email;
 
 
-    public User(String name, String address, String email) {
+    public User(String name, Address address, String email) {
         this.name = name;
         this.address = address;
         this.email = email;
     }
 
-    public User(String name, String address) {
+    public User(String name, Address address) {
         this.name = name;
         this.address = address;
+        this.email = null;
+    }
+
+    public User(String name) {
+        this.name = name;
+        this.address = null;
         this.email = null;
     }
 
@@ -32,11 +38,11 @@ public class User {
         this.name = name;
     }
 
-    public String getAddress() {
+    public Address getAddress() {
         return this.address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 
@@ -51,6 +57,10 @@ public class User {
 
     public Optional<String> getNameOptional() {
         return Optional.ofNullable(name);
+    }
+
+    public Optional<Address> getAddressOptional() {
+        return Optional.ofNullable(address);
     }
 
 }
