@@ -1,4 +1,5 @@
 package optionals;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +38,6 @@ public class UserTest {
         //Optional.of() will throw exception when the value is null
         assertThrows(NullPointerException.class, () -> {
             Optional<User> emptyUser = Optional.of(user);
-
         });
         
         //Optional.ofNullable() won't
@@ -93,7 +93,10 @@ public class UserTest {
     public void whenEmptyValue_thenExecuteMethod() throws Exception {
         User u1 = null;
 
-        User result = Optional.ofNullable(u1).orElse(createNewUser());
+        Optional<User> result = Optional.ofNullable(u1);
+
+        //orElse() or orElseGet() is used instead of get()
+        User user = result.orElse(createNewUser());
     }
 
     @Test
@@ -134,6 +137,18 @@ public class UserTest {
 
         //but the objects in Optional are the same
         assertEquals(userOpt1.getName(), userOpt2.getName());
+    }
+
+    // --- Returning an Exception ---
+    
+    //orElseThrow() method throws an exception if the object is empty
+    @Test
+    public void whenThrowException_thenOk() throws Exception {
+        User user = null;
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            User emptyOpt = Optional.ofNullable(user).orElseThrow(() -> new IllegalArgumentException());
+        });
     }
 
 }
