@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;   
     
@@ -227,5 +229,55 @@ public class UserTest {
         assertNotEquals(result3, result1);
         assertEquals(result3, DEFAULT);
     }
+
+    // --- Java 9 Additions ---
+
+    //or() method - used before get()
+    @Test
+    public void whenEmptyOptional_thenGetValueFromOr() throws Exception {
+        User user = null;
+
+        //lambda will execute when object is null
+        User result = Optional.ofNullable(user)
+            .or(() -> Optional.of(new User(DEFAULT))).get();
+
+        //---
+        Optional<User> userOpt = Optional.ofNullable(user);
+        User result2 = userOpt
+            .or(() -> Optional.of(result)).get();
+
+        assertEquals(result.getName(), DEFAULT);
+        assertEquals(result.getName(), result2.getName());
+    }
+
+    //ifPresentOrElse() method takes two arguments: a Consumer and a Runnable.
+    //If the object contains a value, then the Consumer action is executed; otherwise, the Runnable action is performed.
+    @Test
+    public void whenEmptyOptional_thenGetValueFromConsumer() throws Exception {
+        //User user = null;
+        User user = new User(NAME_1);
+
+        Optional.ofNullable(user)
+            .ifPresentOrElse(
+                u -> System.out.println("User name is: " + u.getName()), // Consumer
+                () -> System.out.println("User is null") // Runnable
+            );
+    }
+
+    //stream() method transforms the instance to a Stream object
+    //there will be an empty Stream if value is not present or a Stream containing a single value
+    @Test
+    public void whenGetStream_thenOk() throws Exception {
+        User user = new User(NAME_1, ADDRESS, EMAIL);
+
+        List<String> emails = Optional.ofNullable(user)
+            .stream()
+            .filter(u -> u.getEmail() != null && u.getEmail().contains("@"))
+            .map(User::getEmail)
+            .collect(Collectors.toList());
+
+        assertTrue(emails.size() == 1);
+        assertEquals(emails.get(0), user.getEmail());
+    }
+
 }
-    
