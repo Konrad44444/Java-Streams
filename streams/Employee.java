@@ -37,4 +37,8 @@ public class Employee {
         this.salary = salary;
     }
 
+    public void salaryIncrement(float percent) {
+        this.salary += this.salary * percent / 100;
+    }
+
 }
