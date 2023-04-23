@@ -1,19 +1,19 @@
 package streams;
 
 public class Employee {
-    private int id;
+    private Integer id;
     private String name;
-    private int salary;
+    private Double salary;
 
     public Employee() {}
 
-    public Employee(int id, String name, int salary) {
+    public Employee(Integer id, String name, Double salary) {
         this.id = id;
         this.name = name;
         this.salary = salary;
     }
 
-    public int getId() {
+    public Integer getId() {
         return this.id;
     }
 
@@ -29,15 +29,15 @@ public class Employee {
         this.name = name;
     }
 
-    public int getSalary() {
+    public Double getSalary() {
         return this.salary;
     }
 
-    public void setSalary(int salary) {
+    public void setSalary(Double salary) {
         this.salary = salary;
     }
 
-    public void salaryIncrement(float percent) {
+    public void salaryIncrement(Double percent) {
         this.salary += this.salary * percent / 100;
     }
 

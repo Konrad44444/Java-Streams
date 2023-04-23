@@ -250,11 +250,24 @@ public class EmployeeTest {
             .average()
             .orElseThrow(NoSuchElementException::new);
 
-        assertEquals(avgSalary, 20000.0);
+        assertEquals(20000.0, avgSalary);
     }
 
     // -- other specialized streams
     // mapToLong, mapToDouble
     
+    // --- Reduction Operations ---
+
+    // - reduce()
+    @Test
+    public void testReduce() throws Exception {
+        Double sumSalaries = streamFromArray
+            .map(Employee::getSalary)
+            .reduce(0.0, Double::sum);
+
+        assertEquals(60000.0, sumSalaries);
+    }
+
+    // other reduce operations are min(), max(), findFirts()
 }
     
