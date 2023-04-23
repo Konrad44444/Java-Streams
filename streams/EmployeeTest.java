@@ -12,20 +12,21 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
 public class EmployeeTest {
-    static final int ID1 = 1;
-    static final int ID2 = 2;
-    static final int ID3 = 3;
+    static final Integer ID1 = 1;
+    static final Integer ID2 = 2;
+    static final Integer ID3 = 3;
     static final String NAME1 = "Bulbek";
     static final String NAME2 = "Adam";
     static final String NAME3 = "Ewa";
-    static final int SALARY1 = 10000;
-    static final int SALARY2 = 20000;
-    static final int SALARY3 = 30000;
+    static final Double SALARY1 = Double.valueOf(10000.0);
+    static final Double SALARY2 = Double.valueOf(20000.0);
+    static final Double SALARY3 = Double.valueOf(30000.0);
 
     // --- Java Stream Creation ---
     static Employee[] employeesArray = {
@@ -60,7 +61,7 @@ public class EmployeeTest {
     // - forEach()
     @Test
     public void streamForEachTest() throws Exception {
-        streamFromList.forEach(e -> e.salaryIncrement(10.0f));
+        streamFromList.forEach(e -> e.salaryIncrement(Double.valueOf(10.0)));
 
         assertAll(
             () -> assertEquals(employeesList.get(0).getSalary(), 1.1 * SALARY1),
@@ -147,7 +148,7 @@ public class EmployeeTest {
     @Test
     public void testPeek() throws Exception {
         List<Employee> testEmployeeList =  employeesList.stream()
-            .peek(e -> e.salaryIncrement(10.0f))
+            .peek(e -> e.salaryIncrement(Double.valueOf(10.0)))
             .peek(System.out::println)
             .collect(Collectors.toList());
 
@@ -218,5 +219,42 @@ public class EmployeeTest {
         assertTrue(oneEven);
         assertFalse(noneMultipleOfThree);
     }
+
+
+    // --- Stream Specializations ---
+
+    // - creation
+    // mapToInt() 
+    @Test
+    public void testMapToInt() throws Exception {
+        Integer result = streamFromArray
+            .mapToInt(Employee::getId)
+            .max()
+            .orElseThrow(NoSuchElementException::new);
+
+        assertEquals(ID3, result);
+    }
+
+    // - other ways to create IntStream
+    IntStream intStream1 = IntStream.of(1, 2, 3, 4, 5);
+    IntStream intStream2 = IntStream.range(10, 19); // values 10, 11, ..., 19
+
+    // create Stream<Integer> from IntStream
+    Stream<Integer> streamFromIntStream = intStream1.boxed();
+
+    // - specialized streams provide additional operations, for example: sum(), average(), range()...
+    @Test
+    public void testAverageIntStream() {
+        Double avgSalary = streamFromArray
+            .mapToDouble(Employee::getSalary)
+            .average()
+            .orElseThrow(NoSuchElementException::new);
+
+        assertEquals(avgSalary, 20000.0);
+    }
+
+    // -- other specialized streams
+    // mapToLong, mapToDouble
+    
 }
     
