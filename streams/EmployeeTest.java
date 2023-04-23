@@ -2,10 +2,14 @@ package streams;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -154,5 +158,65 @@ public class EmployeeTest {
         );
     }
 
+    // --- Comparison Based Stream Operations ---
+
+    // - sorted()
+    @Test
+    public void testSorted() throws Exception {
+        List<Employee> testList = streamFromArray
+            .sorted((e1, e2) -> e1.getName().compareTo(e2.getName()))
+            .collect(Collectors.toList());
+
+        assertAll(
+            () -> assertEquals(testList.get(0).getName(), NAME2),
+            () -> assertEquals(testList.get(1).getName(), NAME1),
+            () -> assertEquals(testList.get(2).getName(), NAME3)
+        );
+    }
+
+    // - min() and max()
+    // they return Optional
+    @Test
+    public void testFindMinID() throws Exception {
+        Employee e = streamFromArray
+            .min((e1, e2) -> e1.getId() - e2.getId())
+            .orElseThrow(NoSuchElementException::new);
+
+        assertEquals(e.getId(), ID1);
+    }
+
+    @Test
+    public void testFindMaxSalary() throws Exception {
+        Employee e = streamFromArray
+            .max(Comparator.comparing(Employee::getSalary))
+            .orElseThrow(NoSuchElementException::new);
+
+        assertEquals(e.getSalary(), SALARY3);
+    }
+
+    // - distinct()
+    // removes duplicates from stream
+    @Test
+    public void testDistinct() throws Exception {
+        List<Integer> integers = Arrays.asList(1, 2, 3, 2, 1, 4, 5, 5, 1);
+        List<Integer> integersFromStream = integers.stream().distinct().collect(Collectors.toList());
+
+        assertEquals(integersFromStream.size(), 5);
+    }
+
+    // - allMatch(), anyMatch(), noneMatch()
+    // they all take predicate and return boolean
+    @Test
+    public void testMatches() throws Exception {
+        List<Integer> intList = Arrays.asList(2, 4, 5, 6, 8);
+    
+        boolean allEven = intList.stream().allMatch(i -> i % 2 == 0);
+        boolean oneEven = intList.stream().anyMatch(i -> i % 2 == 0);
+        boolean noneMultipleOfThree = intList.stream().noneMatch(i -> i % 3 == 0);
+    
+        assertFalse(allEven);
+        assertTrue(oneEven);
+        assertFalse(noneMultipleOfThree);
+    }
 }
     
