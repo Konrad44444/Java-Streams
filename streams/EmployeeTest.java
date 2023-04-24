@@ -8,13 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
+import java.util.Vector;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class EmployeeTest {
@@ -268,6 +274,133 @@ public class EmployeeTest {
         assertEquals(60000.0, sumSalaries);
     }
 
-    // other reduce operations are min(), max(), findFirts()
+    // other reduce operations are min(), max(), findFirst()
+
+
+    // --- Advanced collect ---
+    
+    // - joining()
+    @Test
+    public void testJoining() throws Exception {
+        String employeesNames = streamFromArray
+            .map(Employee::getName)
+            .collect(Collectors.joining(", "))
+            .toString();
+
+        assertEquals(NAME1 + ", " + NAME2 + ", " + NAME3, employeesNames);
+    }
+
+    // - toSet()
+    @Test
+    public void testToSet() throws Exception {
+        Set<String> emplSet = streamFromArray
+            .map(Employee::getName)
+            .collect(Collectors.toSet());
+
+        assertEquals(3, emplSet.size());
+    }
+
+    // - toCollection()
+    // extreact elements into any other collection
+    @Test
+    public void testToCollection() throws Exception {
+        Vector<String> emplNamesVector = employeesList.stream()
+            .map(Employee::getName)
+            .collect(Collectors.toCollection(Vector::new));
+
+            assertEquals(3, emplNamesVector.size());
+    }
+
+    // - summarizingDouble()
+    @Test
+    public void testSummarizingDouble() throws Exception {
+        DoubleSummaryStatistics summary = employeesList.stream()
+            .collect(Collectors.summarizingDouble(Employee::getSalary));
+
+        // the other way to create
+        DoubleSummaryStatistics summary2 = employeesList.stream()
+            .mapToDouble(Employee::getSalary)
+            .summaryStatistics();
+
+        assertAll(
+            () -> assertEquals(3, summary.getCount()),
+            () -> assertEquals(10000.0, summary.getMin()),
+            () -> assertEquals(30000.0, summary.getMax()),
+            () -> assertEquals(60000.0, summary.getSum()),
+            () -> assertEquals(20000.0, summary.getAverage()),
+            () -> assertEquals(summary.getAverage(), summary2.getAverage())
+        );
+    } 
+
+    // - partitioningBy()
+    // partition a stream into two – based on whether the elements satisfy certain criteria or not
+    @Test
+    public void testPartitioningBy() throws Exception {
+        List<Integer> intList = Arrays.asList(2, 4, 5, 9, 6, 8);
+        Map<Boolean, List<Integer>> isEven = intList.stream()
+            .collect(Collectors.partitioningBy(i -> i % 2 == 0));
+
+        assertAll(
+            () -> assertEquals(4 ,isEven.get(true).size()),
+            () -> assertEquals(2, isEven.get(false).size())
+        );
+    }
+
+    // - groupingBy()
+    // partition stream into more than two groups
+    @Test
+    public void testGroupingBy() throws Exception {
+        Map<Character, List<Employee>> groupByAlphabet = employeesList.stream()
+            .collect(
+                Collectors.groupingBy(e -> Character.valueOf(e.getName().charAt(0)))
+            );
+
+        assertAll(
+            () -> assertEquals(groupByAlphabet.get('A').get(0).getName(), "Adam"),
+            () -> assertEquals(groupByAlphabet.get('B').get(0).getName(), "Bulbek"),
+            () -> assertEquals(groupByAlphabet.get('E').get(0).getName(), "Ewa")
+        );
+    }
+
+    // - mapping()
+    // when there is a need to group data into a type other than stream element type
+    @Test
+    public void testMapping() throws Exception {
+
+        List<Integer> idList = employeesList.stream()
+            .collect(
+                Collectors.mapping(Employee::getId, Collectors.toList())
+            );
+            
+
+        assertAll(
+            () -> assertEquals(idList.get(1), ID2),
+            () -> assertEquals(idList.get(0), ID1),
+            () -> assertEquals(idList.get(2), ID3)
+        );
+
+    }
+
+    // - reducing()
+    // returns a collector which performs a reduction of its input elements
+    // reducing() is most useful when used in a multi-level reduction, downstream of groupingBy() or partitioningBy()
+    @Test
+    public void testReducing() throws Exception {
+        Comparator<Employee> byNameLength = Comparator.comparing(Employee::getName);
+
+        Map<Character, Optional<Employee>> longestNameByAlphabet = employeesList.stream()
+            .collect(
+                Collectors.groupingBy(e -> Character.valueOf(e.getName().charAt(0)),
+                Collectors.reducing(BinaryOperator.maxBy(byNameLength)))
+            );
+
+        assertAll(
+            () -> assertEquals(longestNameByAlphabet.get(Character.valueOf('B')).get().getName(), "Bulbek"),
+            () -> assertEquals(longestNameByAlphabet.get(Character.valueOf('A')).get().getName(), "Adam"),
+            () -> assertEquals(longestNameByAlphabet.get(Character.valueOf('E')).get().getName(), "Ewa")
+        );
+    }
+
+
 }
     
