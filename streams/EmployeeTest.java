@@ -5,6 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -20,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class EmployeeTest {
@@ -426,5 +431,45 @@ public class EmployeeTest {
         assertEquals(collect, Arrays.asList(2, 4, 8, 16, 32));
     }
 
+
+    // --- Java Streams Improvements In Java 9 ---
+
+    // - takeWhile()
+    // takes elements from a stream while a given condition is true
+    @Test
+    public void testTakeWhile() throws Exception {
+        Stream.iterate(1, i -> i + 1)
+            .takeWhile(n -> n <= 10)
+            .map(x -> x * x)
+            .forEach(System.out::println);
+    }
+
+    // - dropWhile()
+    // does the opposite of takeWhile()
+    @Test
+    public void testDropWhile() throws Exception {
+        Stream.of(1,2,3,4,5,6,7,8,9,0,9,8,7,6,5,4,3,2,1,0)
+            .dropWhile(x -> x <= 5)
+            .forEach(System.out::println);
+    }
+
+    // - iterate()
+    // adds a new parameter, which is a predicate used to decide when the loop should terminate
+    @Test
+    public void testNewIterate() throws Exception {
+        Stream.iterate(1, i -> i < 256, i -> i * 2)
+	        .forEach(System.out::println);
+    }
+
+    // - ofNullable()
+    // returns empty Optionals in it if receives null
+    @Test
+    public void testOfNullable() throws Exception {
+        Integer number = null;
+        
+        Stream<Integer> result = Stream.ofNullable(number);
+        
+        result.map(x -> x * x).forEach(System.out::println); //nothing will happen 
+    }
 }
     
