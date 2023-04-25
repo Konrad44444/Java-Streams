@@ -402,5 +402,29 @@ public class EmployeeTest {
     }
 
 
+    // --- Infinite Streams ---
+
+    // - generate()
+    // generate() is called whenever new stream elements neet to be generated
+    @Test
+    public void testGenerate() throws Exception {
+        Stream.generate(Math::random)
+            .limit(5)
+            .forEach(System.out::println);
+    }
+
+    // - iterate()
+    // takes two parameters: an initial value (seed element) and a function which generates next element using the previous value
+    @Test
+    public void testIterate() throws Exception {
+        Stream<Integer> powersOfTwo = Stream.iterate(2, i -> i = i * 2);
+
+        List<Integer> collect = powersOfTwo
+            .limit(5)
+            .collect(Collectors.toList());
+
+        assertEquals(collect, Arrays.asList(2, 4, 8, 16, 32));
+    }
+
 }
     
